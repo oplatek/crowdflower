@@ -57,7 +57,7 @@ class Job(object):
 
     '''
     READ_WRITE_FIELDS = ['auto_order', 'auto_order_threshold', 'auto_order_timeout', 'cml', 'cml_fields', 'confidence_fields', 'css', 'custom_key', 'excluded_countries', 'gold_per_assignment', 'included_countries', 'instructions', 'js', 'judgments_per_unit', 'language', 'max_judgments_per_unit', 'max_judgments_per_contributor', 'min_unit_confidence', 'options', 'pages_per_assignment', 'problem', 'send_judgments_webhook', 'state', 'title', 'units_per_assignment', 'webhook_uri']
-    _cache_key_attrs = ('id',)
+    _cache_key_attrs = ('jobid',)
 
     def __init__(self, job_id, connection):
         self.jobid = job_id
