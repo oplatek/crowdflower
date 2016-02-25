@@ -2,10 +2,10 @@ from setuptools import setup, find_packages
 
 setup(
     name='crowdflower',
-    version='0.1.4',
+    version='0.1.5',
     author='Christopher Brown',
     author_email='io@henrian.com',
-    url='https://github.com/peoplepattern/crowdflower',
+    url='https://github.com/URXTech/crowdflower',
     keywords='crowdflower crowdsourcing api client',
     description='CrowdFlower API - Python client',
     long_description=open('README.rst').read(),
