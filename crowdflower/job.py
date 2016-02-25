@@ -60,7 +60,7 @@ class Job(object):
     _cache_key_attrs = ('id',)
 
     def __init__(self, job_id, connection):
-        self.id = job_id
+        self.jobid = job_id
         self._connection = connection
         self._cache = self._connection._cache
 
@@ -73,24 +73,24 @@ class Job(object):
     @property
     @cacheable()
     def properties(self):
-        return self._connection.request('/jobs/%s' % self.id)
+        return self._connection.request('/jobs/%s' % self.jobid)
 
 
     @cacheable('tags')
     def get_tags(self):
-        res = self._connection.request('/jobs/%s/tags' % self.id)
+        res = self._connection.request('/jobs/%s/tags' % self.jobid)
         return [item['name'] for item in res]
 
     def set_tags(self, tags):
         params = rails_params({'tags': tags})
-        self._connection.request('/jobs/%s/tags' % self.id, method='PUT', params=params)
+        self._connection.request('/jobs/%s/tags' % self.jobid, method='PUT', params=params)
         self._cache_flush('tags')
 
     tags = property(get_tags, set_tags)
 
     def add_tags(self, tags):
         params = rails_params({'tags': tags})
-        self._connection.request('/jobs/%s/tags' % self.id, method='POST', params=params)
+        self._connection.request('/jobs/%s/tags' % self.jobid, method='POST', params=params)
         self._cache_flush('tags')
 
 
@@ -132,14 +132,14 @@ class Job(object):
 
         Neither `page` nor `limit` query parameters are documented, but they work as expected. Page numbering starts at 1, and the limit has a maximum of 1000 (which is also the default).
 
-        The returned units are not fully hydrated; in fact, the response only includes each unit id and the original unit payload. To see the crowd's responses, you must use /jobs/{job.id}/units/{unit.id}, or the bulk download method (see Job.download()).
+        The returned units are not fully hydrated; in fact, the response only includes each unit id and the original unit payload. To see the crowd's responses, you must use /jobs/{job.jobid}/units/{unit.jobid}, or the bulk download method (see Job.download()).
 
         '''
         page = 0
         while True:
             page += 1
             params = dict(page=page)
-            units_response = self._connection.request('/jobs/%s/units' % self.id, params=params)
+            units_response = self._connection.request('/jobs/%s/units' % self.jobid, params=params)
             for unit_id, unit_properties in units_response.items():
                 # hopefully the user has not specified '_unit_id' as a custom field
                 unit_properties['_unit_id'] = unit_id
@@ -148,7 +148,7 @@ class Job(object):
                 break
 
     def delete_unit(self, unit_id):
-        response = self._connection.request('/jobs/%s/units/%s' % (self.id, unit_id), method='DELETE')
+        response = self._connection.request('/jobs/%s/units/%s' % (self.jobid, unit_id), method='DELETE')
         # bust cache if the request did not raise any errors
         self._cache_flush('units')
         return response
@@ -159,7 +159,7 @@ class Job(object):
         '''
         headers = {'Content-Type': 'application/json'}
         data = json.dumps({'unit': {'data': unit}})
-        res = self._connection.request('/jobs/%s/units' % self.id, method='POST', headers=headers, data=data)
+        res = self._connection.request('/jobs/%s/units' % self.jobid, method='POST', headers=headers, data=data)
 
         # reset cached units
         self._cache_flush('units')
@@ -169,8 +169,8 @@ class Job(object):
     def upload(self, units):
         headers = {'Content-Type': 'application/json'}
         data = '\n'.join(json.dumps(unit) for unit in units)
-        logger.debug('Uploading data to Job[%d]: %s', self.id, data)
-        res = self._connection.request('/jobs/%s/upload' % self.id, method='POST', headers=headers, data=data)
+        logger.debug('Uploading data to Job[%d]: %s', self.jobid, data)
+        res = self._connection.request('/jobs/%s/upload' % self.jobid, method='POST', headers=headers, data=data)
 
         # reset cached units
         self._cache_flush('units')
@@ -179,10 +179,10 @@ class Job(object):
 
     def update(self, props):
         params = rails_params({'job': props})
-        logger.debug('Updating Job[%d]: %r', self.id, params)
+        logger.debug('Updating Job[%d]: %r', self.jobid, params)
 
         try:
-            res = self._connection.request('/jobs/%s' % self.id, method='PUT', params=params)
+            res = self._connection.request('/jobs/%s' % self.jobid, method='PUT', params=params)
         except CrowdFlowerError, exc:
             # CrowdFlower sometimes likes to redirect the PUT to a non-API page,
             # which will raise an error (406 Not Accepted), but we can just
@@ -207,7 +207,7 @@ class Job(object):
         The API documentation includes a PUT call at this endpoint, but I'm
         not sure if it actually does anything.
         '''
-        return self._connection.request('/jobs/%s/channels' % self.id)
+        return self._connection.request('/jobs/%s/channels' % self.jobid)
 
     def legend(self):
         '''
@@ -216,7 +216,7 @@ class Job(object):
         > The legend will show you the generated keys that will end up being
         > submitted with your form.
         '''
-        return self._connection.request('/jobs/%s/legend' % self.id)
+        return self._connection.request('/jobs/%s/legend' % self.jobid)
 
     def gold_reset(self):
         '''
@@ -227,7 +227,7 @@ class Job(object):
         and adding them should not have the same API endpoint in the first place.
         '''
         params = dict(reset='true')
-        res = self._connection.request('/jobs/%s/gold' % self.id, method='PUT', params=params)
+        res = self._connection.request('/jobs/%s/gold' % self.jobid, method='PUT', params=params)
         # reset cache
         self._cache_flush('properties')
         self._cache_flush('units')
@@ -250,7 +250,7 @@ class Job(object):
         params = dict(check=check, convert_units='true')
         if check_with is not None:
             params['with'] = check_with
-        res = self._connection.request('/jobs/%s/gold' % self.id, method='PUT', params=params)
+        res = self._connection.request('/jobs/%s/gold' % self.jobid, method='PUT', params=params)
         # reset cache
         self._cache_flush('properties')
         self._cache_flush('units')
@@ -264,7 +264,7 @@ class Job(object):
         '''
         channels = list(channels)
         data = rails_params(dict(channels=channels, debit=dict(units_count=units_count)))
-        res = self._connection.request('/jobs/%s/orders' % self.id, method='POST', params=data)
+        res = self._connection.request('/jobs/%s/orders' % self.jobid, method='POST', params=data)
         self._cache_flush('properties')
         return res
 
@@ -272,7 +272,7 @@ class Job(object):
         '''
         Cancel this job and refund your account for any judgments not yet received.
         '''
-        res = self._connection.request('/jobs/%s/cancel' % self.id, method='PUT')
+        res = self._connection.request('/jobs/%s/cancel' % self.jobid, method='PUT')
         self._cache_flush('properties')
         return res
 
@@ -293,13 +293,13 @@ class Job(object):
                 "completed_units_estimate": 288
             }
         '''
-        return self._connection.request('/jobs/%s/ping' % self.id)
+        return self._connection.request('/jobs/%s/ping' % self.jobid)
 
     def delete(self):
         '''
         Deletes the entire job permanently
         '''
-        return self._connection.request('/jobs/%s' % self.id, method='DELETE')
+        return self._connection.request('/jobs/%s' % self.jobid, method='DELETE')
 
     def copy(self, all_units=None, gold=None):
         '''
@@ -314,7 +314,7 @@ class Job(object):
             params = {'all_units': all_units}
         elif gold is not None:
             params = {'gold': gold}
-        response = self._connection.request('/jobs/%s/copy' % self.id, method='GET', params=params)
+        response = self._connection.request('/jobs/%s/copy' % self.jobid, method='GET', params=params)
         return Job(response['id'], self._connection)
 
     def download(self, full=True):
@@ -368,7 +368,7 @@ class Job(object):
         # pulls down the csv endpoint, unzips it, and returns a list of all the rows
         params = dict(full='true' if full else 'false')
         # use .csv, not headers=dict(Accept='text/csv'), which Crowdflower rejects
-        req = self._connection.create_request('/jobs/%s.csv' % self.id, method='GET', params=params)
+        req = self._connection.create_request('/jobs/%s.csv' % self.jobid, method='GET', params=params)
         res = self._connection.send_request(req)
         # because ZipFile insists on seeking, we can't simply pass over the res.raw stream
         fp = StringIO()
@@ -413,7 +413,7 @@ class Job(object):
             params['type'] = report_type
         # even type=json uses the .csv extension. I guess because JSON's values
         # are at least partly separated by commas?
-        req = self._connection.create_request('/jobs/%s.csv' % self.id, method='GET', params=params)
+        req = self._connection.create_request('/jobs/%s.csv' % self.jobid, method='GET', params=params)
         res = self._connection.send_request(req)
         fp = StringIO()
         fp.write(res.content)
@@ -437,5 +437,5 @@ class Job(object):
         params = {}
         if report_type is not None:
             params['type'] = report_type
-        req = self._connection.create_request('/jobs/%s/regenerate' % self.id, method='POST', params=params)
+        req = self._connection.create_request('/jobs/%s/regenerate' % self.jobid, method='POST', params=params)
         self._connection.send_request(req)
