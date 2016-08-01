@@ -14,4 +14,4 @@ logger = logging.getLogger('crowdflower')
 
 
 # import helper
-from connection import Connection
+from crowdflower.connection import Connection

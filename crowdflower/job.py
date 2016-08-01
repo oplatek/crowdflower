@@ -3,7 +3,10 @@ import json
 import shutil
 import zipfile
 from pprint import pformat
-from cStringIO import StringIO
+try:
+    from StringIO import StringIO
+except ImportError:
+    from io import StringIO
 
 from crowdflower import logger
 from crowdflower.exception import CrowdFlowerError
@@ -75,7 +78,6 @@ class Job(object):
     def properties(self):
         return self._connection.request('/jobs/%s' % self.jobid)
 
-
     @cacheable('tags')
     def get_tags(self):
         res = self._connection.request('/jobs/%s/tags' % self.jobid)
@@ -92,7 +94,6 @@ class Job(object):
         params = rails_params({'tags': tags})
         self._connection.request('/jobs/%s/tags' % self.jobid, method='POST', params=params)
         self._cache_flush('tags')
-
 
     @property
     @cacheable()
@@ -183,7 +184,7 @@ class Job(object):
 
         try:
             res = self._connection.request('/jobs/%s' % self.jobid, method='PUT', params=params)
-        except CrowdFlowerError, exc:
+        except CrowdFlowerError as exc:
             # CrowdFlower sometimes likes to redirect the PUT to a non-API page,
             # which will raise an error (406 Not Accepted), but we can just
             # ignore the error since it comes after the update is complete.
@@ -191,7 +192,8 @@ class Job(object):
             # (e.g., with downloads), but following redirects is more properly
             # not the default
             if exc.response.status_code != 406:
-                logger.info('Ignoring 406 "Not Accepted" error: %r', exc);
+                logger.info('Ignoring 406 "Not Accepted" error: %r', exc)
+                res = {'errors': 'Ignoring 406 "Not Accepted" error: %r' % exc}
             else:
                 raise
 
