@@ -3,9 +3,9 @@ from setuptools import setup, find_packages
 setup(
     name='crowdflower',
     version='0.1.5',
-    author='Christopher Brown',
-    author_email='io@henrian.com',
-    url='https://github.com/URXTech/crowdflower',
+    author='Christopher Brown, Python3 fixes Ondrej Platek',
+    author_email='io@henrian.com, ondrej.platek@seznam.cz',
+    url='https://github.com/oplatek/crowdflower',
     keywords='crowdflower crowdsourcing api client',
     description='CrowdFlower API - Python client',
     long_description=open('README.rst').read(),
